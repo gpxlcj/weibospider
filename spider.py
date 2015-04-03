@@ -17,12 +17,10 @@ import logging
 #excel读写操作
 from openpyxl import Workbook, load_workbook
 
-
 from save import save_search_data
-from login import wblogin, get_session
 
 #配置信息
-from settings import START_PAGE, USERNAME, PASSWORD, START_NUM, TOTAL_PAGE, APP_SOURCE, SAVE_FILE_NAME, SHEET_NAME
+from settings import START_PAGE, USERNAME, PASSWORD, START_NUM, TOTAL_PAGE, APP_SOURCE, SAVE_FILE_NAME, SHEET_NAME, KEY_WORDS
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -40,7 +38,7 @@ def get_p(text):
             content_list[i] = content_list[i][:-5]
         return content_list
     else:
-        print ('aas')
+        print ('log more time')
     return 0
 
 
@@ -53,10 +51,8 @@ def save_catch_page(get_text):
     return get_text
     
 
-
-#搜索带关键词信息
-def iesous_location(session):
-    num = START_NUM #信息总条数
+#初始化excel表格
+def init_xls():
     wb = Workbook()
     ws = wb.get_active_sheet()
     ws.cell(row=1, column=1).value = u'描述'
@@ -64,29 +60,23 @@ def iesous_location(session):
     ws.cell(row=1, column=3).value = u'纬度'
     ws.title = SHEET_NAME
     wb.save(SAVE_FILE_NAME)
+
+
+#搜索信息
+def search_info(session, keyword="", start_time="", end_time="",  num=1, location=0):
     for i in range(START_PAGE, START_PAGE+TOTAL_PAGE):
-        os.system('sleep 6')
-        get_text = session.get('http://s.weibo.com/wb/%25E8%2580%25B6%25E7%25A8%25A3&xsort=time&scope=ori&haslink=1&page='+str(i)).text
+        os.system('sleep 10')
+        get_text = session.get('http://s.weibo.com/wb/'+keyword+'&xsort=time&scope=ori&haslink=1&page='+str(i)).text
         get_text = u'' + get_text
         get_text = get_text.encode('utf-8')
         get_text = save_catch_page(get_text)
          
         get_list = get_p(get_text)
-        num = save_search_data(get_list, session, 1, num)
+        if get_list == 0:
+            pass
+        else:
+            num = save_search_data(get_list, session, location, num)
+    return num
     
 
-if __name__ == '__main__':
-    reload(sys)
-    sys.setdefaultencoding('utf8')
-    print(json.dumps(wblogin(USERNAME, PASSWORD), ensure_ascii=False))
-    iesous_location(get_session()) 
 
-#    for i in range(1, 10):
-#        os.system('sleep 3')
-#        get_text = session.get('http://s.weibo.com/wb/%25E6%2588%25BF%25E4%25BB%25B7&page='+str(i)).text
-#        get_text = u'' + get_text
-#        get_text = get_text.encode('utf-8')
-#        get_text = save_catch_page(get_text)
-
-#        get_list = get_p(get_text)
-#        save_search_data(get_list)
