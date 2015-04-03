@@ -30,7 +30,6 @@ def save_search_data(get_list, session, location=0, num=0):
     ew = ExcelWriter(wb)
     ws = wb.get_sheet_by_name(SHEET_NAME)
     for i in get_list:
-        num = num + 1
         i = i.encode('utf-8')
         i = i+u''
         if location==0:
@@ -44,11 +43,15 @@ def save_search_data(get_list, session, location=0, num=0):
         i = unicode(i, 'unicode-escape')
         i = i.encode('utf-8')
         if coordinate:
+            num = num + 1
             longitude = coordinate[0]
             latitude = coordinate[1]
             ws.cell(row=num+1, column=2).value = longitude
             ws.cell(row=num+1, column=3).value = latitude
-        ws.cell(row=num+1, column=1).value = i        
+            ws.cell(row=num+1, column=1).value = i        
+        elif num==0:
+            num = num + 1
+            ws.cell(row=num+1, column=1).value = i
     ew.save(SAVE_FILE_NAME)
     print (num)
     return num
