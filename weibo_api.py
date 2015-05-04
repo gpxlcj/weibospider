@@ -17,8 +17,6 @@ import logging
 #配置文件
 from settings import APP_SOURCE, APP_SOURCE_LIST,SAVE_FILE_NAME
 
-
-
 #短链接转换为长链接取坐标
 def short_to_long(url, session, app_num=0):
     if u't.cn' in url:

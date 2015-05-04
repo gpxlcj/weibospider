@@ -17,4 +17,8 @@ PASSWORD = ''
 #微博API信息
 APP_SOURCE = '' 
 APP_SOURCE_LIST = list() 
+#开始结束时间, 时间间隔
+START_TIME = ''
+END_TIME = ''
+INTER_TIME = ''
 
