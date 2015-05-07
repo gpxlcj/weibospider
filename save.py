@@ -23,6 +23,10 @@ from openpyxl.writer.excel import ExcelWriter
 
 from settings import SAVE_FILE_NAME, APP_SOURCE, SHEET_NAME
 
+#存储关注结果
+def save_follow_data(get_list, session):
+    pass 
+
 #存储搜索结果
 def save_search_data(get_list, session, location=0, num=0):
 # location: 是否要获取目标地址,1获取，0不获取
