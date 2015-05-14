@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import os
-import sys
 import json
 
 from login import get_session, wblogin
 from settings import START_PAGE, USERNAME, PASSWORD, START_NUM, TOTAL_PAGE, APP_SOURCE, SAVE_FILE_NAME, SHEET_NAME, KEY_WORDS
 from spider import search_info, search_follow
-from base import init_xls
+from base import init_xls, init_env
 
 
 if __name__ == '__main__':
-    reload(sys)
-    sys.setdefaultencoding('utf8')
+    init_env()
     print(json.dumps(wblogin(USERNAME, PASSWORD), ensure_ascii=False))
     num = 1 #信息开始记录的行数
     init_xls(1)

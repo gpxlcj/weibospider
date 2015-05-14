@@ -7,6 +7,12 @@ import sys
 #excel读写操作
 from openpyxl import Workbook, load_workbook
 
+#初始化环境
+def init_env():
+    reload(sys)
+    sys.setdefaultencoding('utf8')
+
+
 #存储抓取的页面信息
 def save_catch_page(get_text):
     file_a = open('page_1', 'wb')
