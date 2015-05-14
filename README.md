@@ -3,8 +3,6 @@
 **Author:** [gpxlcj][1]</br>
 **Update time:**2015.05.07</br>
 
-[TOC]
-
 Description
 ----------
 
