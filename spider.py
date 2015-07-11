@@ -27,12 +27,11 @@ from settings import START_PAGE, USERNAME, PASSWORD, START_NUM, TOTAL_PAGE, APP_
 logging.basicConfig(level=logging.DEBUG)
 
 
-#获取关注人姓名
+#获取关注人姓名(未实现)
 def search_follow(session, user_id, num, is_me=0):
     if is_me:
         for i in range(1, 6):
-            url =
-            "http://weibo.com/p/100505"+user_id+"/myfollow?t=1&cfs=&Pl_Official_RelationMyfollow__104_page="+i+"#Pl_Official_RelationMyfollow__104"
+            url = u"http://weibo.com/p/100505"+user_id+"/myfollow?t=1&cfs=&Pl_Official_RelationMyfollow__104_page="+str(i)+"#Pl_Official_RelationMyfollow__104"
             text = session.get(url).text     
 
 #处理搜索页面抓取的数据
@@ -61,7 +60,7 @@ def generate_time():
 
 #判断是否超过页码
 def out_page(text):
-    r_page = re.compile(u'feed_list_page_morelist')
+    r_page = re.compile(u'feed_list_page_morelist'+'[\s\S]+'+u'page next S_txt1 S_line1?')
     temp = r_page.search(text)
     if temp:
         return True
@@ -69,11 +68,10 @@ def out_page(text):
         return False
 
 
-
 #搜索信息
 def search_info(session, keyword="", start_time="", end_time="",  num=1, location=0):
     for i in range(START_PAGE, START_PAGE+TOTAL_PAGE):
-        url = 'http://s.weibo.com/wb/'+keyword+'&xsort=time&scope=ori&haslink=1'+'&timescope=custom:'+start_time+':'+end_time+'&page='+str(i)
+        url = 'http://s.weibo.com/weibo/'+keyword+'&scope=ori&haslink=1'+'&timescope=custom:'+start_time+':'+end_time+'&page='+str(i)+'&rd=newTips'
         sleep_time = random.randint(10, 30)
         os_sleep = 'sleep '+str(sleep_time)
         os.system(os_sleep)

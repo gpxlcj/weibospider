@@ -6,6 +6,7 @@ import sys
 
 #excel读写操作
 from openpyxl import Workbook, load_workbook
+from settings import SHEET_NAME, SAVE_FILE_NAME
 
 #初始化环境
 def init_env():
