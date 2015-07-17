@@ -2,27 +2,21 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-import sys
 
 import re
-import json
 import random
-import base64
-import binascii
-
-import rsa
-import requests
 
 import logging
+import datetime
 
+from official.weibo_api import get_weibo_by_id, get_weibo_by_ids
 #excel读写操作
-from openpyxl import Workbook, load_workbook
 
-from save import save_search_data, save_follow_data
-from base import save_catch_page
+from save import save_search_data, save_data_by_db
+from settings.base import save_catch_page
 
 #配置信息
-from settings import START_PAGE, USERNAME, PASSWORD, START_NUM, TOTAL_PAGE, APP_SOURCE, SAVE_FILE_NAME, SHEET_NAME, KEY_WORDS, START_TIME, END_TIME
+from settings.settings import START_PAGE, TOTAL_PAGE, START_TIME, END_TIME
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -31,8 +25,9 @@ logging.basicConfig(level=logging.DEBUG)
 def search_follow(session, user_id, num, is_me=0):
     if is_me:
         for i in range(1, 6):
-            url = u"http://weibo.com/p/100505"+user_id+"/myfollow?t=1&cfs=&Pl_Official_RelationMyfollow__104_page="+str(i)+"#Pl_Official_RelationMyfollow__104"
+            url = u"http://weibo.com/p/100505"+user_id+"/myfollow?t=1&cfs=&Pl_Official_RelationMyfollow__104_page="+i+"#Pl_Official_RelationMyfollow__104"
             text = session.get(url).text     
+
 
 #处理搜索页面抓取的数据
 def get_p(text):
@@ -50,13 +45,35 @@ def get_p(text):
         print ('log more time')
     return 0
 
+
 #生成时间
 def generate_time():
     time = {
         'start_time': START_TIME, 
         'end_time': END_TIME
-        }
+    }
     return time 
+
+
+#抓取存储微博id
+def get_id_list(text, session):
+    re_id = re.compile("<div mid=[\s\S]+?>")
+    origin_id_list = re_id.findall(text)
+    re_id = re.compile("mid=\\\\\"[0-9]+\\\\\"")
+    id_list = list()
+    for i in origin_id_list:
+        temp = re_id.search(i)
+        if temp:
+            temp = temp.group()
+            temp = temp[6:len(temp)-2]
+            id_list.append(temp)
+        else:
+            print("None")
+    time = str(datetime.datetime.now()).upper()
+    print(time+'\n'+'ID_LIST Here')
+    print(id_list)
+    return id_list
+
 
 #判断是否超过页码
 def out_page(text):
@@ -70,22 +87,59 @@ def out_page(text):
 
 #搜索信息
 def search_info(session, keyword="", start_time="", end_time="",  num=1, location=0):
+    content_text = str()
+    id_text = str()
+    haslink = str()
+    if location != 0:
+        haslink = "&haslink=1"
     for i in range(START_PAGE, START_PAGE+TOTAL_PAGE):
-        url = 'http://s.weibo.com/weibo/'+keyword+'&scope=ori&haslink=1'+'&timescope=custom:'+start_time+':'+end_time+'&page='+str(i)+'&rd=newTips'
+        url = 'http://s.weibo.com/weibo/'+keyword+'&scope=ori'+haslink+'&timescope=custom:'+start_time+':'+end_time+'&page='+str(i)+'&rd=newTips'
         sleep_time = random.randint(10, 30)
         os_sleep = 'sleep '+str(sleep_time)
         os.system(os_sleep)
         get_text = session.get(url).text
         get_text = u'' + get_text
         get_text = get_text.encode('utf-8')
-        get_text = save_catch_page(get_text)
-        pd = out_page(get_text)
+        content_text = save_catch_page(get_text)
+        pd = out_page(content_text)
         if not pd:
             return num
-        get_list = get_p(get_text)
-        if get_list == 0:
-            pass
-        else:
-            num = save_search_data(get_list, session, location, num)
+        num = get_page_info(content_text, session, location, num)
     return num
 
+
+#搜索信息通过id
+def search_info_by_id(session, keyword="", start_time="", end_time="",  num=1, location=0):
+    content_text = str()
+    id_text = str()
+    haslink = str()
+    if location != 0:
+        haslink = "&haslink=1"
+    for i in range(START_PAGE, START_PAGE+TOTAL_PAGE):
+        url = 'http://s.weibo.com/weibo/'+keyword+'&scope=ori'+haslink+'&timescope=custom:'+start_time+':'+end_time+'&page='+str(i)+'&rd=newTips'
+        sleep_time = random.randint(10, 30)
+        os_sleep = 'sleep '+str(sleep_time)
+        os.system(os_sleep)
+        get_text = session.get(url).text
+        get_text = u'' + get_text
+        get_text = get_text.encode('utf-8')
+        content_text = save_catch_page(get_text)
+        pd = out_page(content_text)
+        if not pd:
+            return num
+        id_list = get_id_list(content_text, session)
+        info_list = get_weibo_by_ids(id_list, session)
+        status = save_data_by_db(info_list)
+        print(status)
+    return num
+
+
+
+#直接抓取html页面数据
+def get_page_info(text, session, location, num):
+    get_list = get_p(text)
+    if get_list == 0:
+        pass
+    else:
+        num = save_search_data(get_list, session, location, num)
+    return num

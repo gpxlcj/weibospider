@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-import os
 import sys
+import time
 
 #excel读写操作
-from openpyxl import Workbook, load_workbook
-from settings import SHEET_NAME, SAVE_FILE_NAME
+from openpyxl import Workbook
+from settings.settings import SHEET_NAME, SAVE_FILE_NAME
 
 #初始化环境
 def init_env():
     reload(sys)
     sys.setdefaultencoding('utf8')
-
 
 #存储抓取的页面信息
 def save_catch_page(get_text):
@@ -21,7 +20,8 @@ def save_catch_page(get_text):
     file_a.write(get_text)
     file_a.close()
     return get_text
-    
+
+
 
 #初始化excel表格
 def init_xls(r_id=0):
@@ -38,3 +38,12 @@ def init_xls(r_id=0):
         ws.cell(row=1, column=3).value = u'被关注者'
         ws.cell(row=1, column=4).value = u'被关注者id'
     wb.save(SAVE_FILE_NAME)
+
+
+#转换时间
+def convert_time(year, month, day, hour=0):
+    time_str = year+'-'+month+'-'+day+' '+hour+':'+'00:00'
+    time_format = "%Y-%m-%d %H:%M:%S"
+    form_time = time.strptime(time_str, time_format)
+    time_stamp = str(time.mktime(form_time))
+    return time_stamp

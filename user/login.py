@@ -17,9 +17,6 @@ import logging
 #excel读写操作
 from openpyxl import Workbook, load_workbook
 
-from save import save_search_data
-#配置信息
-from settings import USERNAME, PASSWORD, APP_SOURCE, SAVE_FILE_NAME, SHEET_NAME
 
 logging.basicConfig(level=logging.DEBUG)
 
