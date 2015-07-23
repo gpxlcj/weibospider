@@ -5,15 +5,17 @@ import json
 
 #配置文件
 from settings.settings import APP_SOURCE_LIST, APP_SOURCE
-
+from lib.log import lg_debug, lg_warning, lg_info, init_log
+init_log()
 
 #判断请求是否超出限制
 def request_limit(url, session, app_num):
     temp_s = session.get('http://api.weibo.com/2/short_url/expand.json?url_short='+url+'&source='+APP_SOURCE_LIST[app_num])
     text = temp_s.text
-    print (text)
+    lg_debug(text)
     text_list = json.loads(text)
     if text_list.has_key('error'):
+        lg_warning('error, out of request limit ERROR')
         return 0 
     else:
         return text_list
@@ -32,7 +34,7 @@ def short_to_long(url, session, app_num=0):
                 break
             app_num += 1
             if app_num >= len(APP_SOURCE_LIST):
-                print ('all of the id out limited')
+                lg_debug('all of the id out limited')
                 return None
     else:
         return None
@@ -51,8 +53,9 @@ def get_weibo_by_id(m_id, session):
     text_dict = None
     try:
         text_dict = text.json()
-    except:
-        print("No Json")
+    except Exception:
+        lg_warning(Exception.message)
+        lg_debug("get_weibo_by_id: No Json")
     return text_dict
 
 
@@ -69,9 +72,10 @@ def get_weibo_by_ids(m_ids, session):
     try:
         text_dict = text.json()
         text_list_dict = text_dict['statuses']
-        print('success catch the info_list')
-    except:
-        print("No Json")
+        lg_debug('success catch the info_list')
+    except Exception:
+        lg_warning(Exception.message)
+        lg_debug("get_weibo_by_ids: No Json")
     return text_list_dict
 
 
@@ -87,8 +91,12 @@ def get_weibo_by_coordinate(session, coordinate, starttime, endtime, range=2000,
     text_list_dict = None
     try:
         text_dict = text.json()
-        text_list_dict = text_dict['statuses']
-        print('success catch the info_list')
-    except:
-        print("No Json")
+        if text_dict.has_key('statuses'):
+            text_list_dict = text_dict['statuses']
+            lg_debug('success catch the info_list')
+        else:
+            lg_debug("get_weibo_by_coordinate: No Json")
+    except Exception:
+        lg_warning(Exception.message)
+        lg_debug("get_weibo_by_coordinate: No Json")
     return text_list_dict

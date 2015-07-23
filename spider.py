@@ -2,24 +2,24 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import os
-
 import re
 import random
-
 import logging
 import datetime
 
-from official.weibo_api import get_weibo_by_id, get_weibo_by_ids
+from official.weibo_api import get_weibo_by_ids
 #excel读写操作
 
 from save import save_search_data, save_data_by_db
-from settings.base import save_catch_page
+from lib.base import save_catch_page
+from lib.log import lg_debug, lg_info, lg_warning
 
 #配置信息
 from settings.settings import START_PAGE, TOTAL_PAGE, START_TIME, END_TIME
 
 logging.basicConfig(level=logging.DEBUG)
 
+from lib.lib_func import wait_time
 
 #获取关注人姓名(未实现)
 def search_follow(session, user_id, num, is_me=0):
@@ -42,7 +42,7 @@ def get_p(text):
             content_list[i] = content_list[i][:-5]
         return content_list
     else:
-        print ('log more time')
+        lg_debug('log more time')
     return 0
 
 
@@ -68,10 +68,10 @@ def get_id_list(text, session):
             temp = temp[6:len(temp)-2]
             id_list.append(temp)
         else:
-            print("None")
+            lg_warning('not match  weibo id')
     time = str(datetime.datetime.now()).upper()
-    print(time+'\n'+'ID_LIST Here')
-    print(id_list)
+    lg_debug(time+'\n'+'ID_LIST Here')
+    lg_info('get_id_list: ' + str(id_list))
     return id_list
 
 
@@ -82,6 +82,7 @@ def out_page(text):
     if temp:
         return True
     else:
+        lg_info('out_page: out of page limit')
         return False
 
 
@@ -95,8 +96,7 @@ def search_info(session, keyword="", start_time="", end_time="",  num=1, locatio
     for i in range(START_PAGE, START_PAGE+TOTAL_PAGE):
         url = 'http://s.weibo.com/weibo/'+keyword+'&scope=ori'+haslink+'&timescope=custom:'+start_time+':'+end_time+'&page='+str(i)+'&rd=newTips'
         sleep_time = random.randint(10, 30)
-        os_sleep = 'sleep '+str(sleep_time)
-        os.system(os_sleep)
+        wait_time(sleep_time)
         get_text = session.get(url).text
         get_text = u'' + get_text
         get_text = get_text.encode('utf-8')
@@ -130,9 +130,8 @@ def search_info_by_id(session, keyword="", start_time="", end_time="",  num=1, l
         id_list = get_id_list(content_text, session)
         info_list = get_weibo_by_ids(id_list, session)
         status = save_data_by_db(info_list)
-        print(status)
+        lg_info(status)
     return num
-
 
 
 #直接抓取html页面数据
@@ -142,4 +141,5 @@ def get_page_info(text, session, location, num):
         pass
     else:
         num = save_search_data(get_list, session, location, num)
+    lg_info('record number: ' + str(num))
     return num

@@ -16,10 +16,11 @@ import logging
 
 #excel读写操作
 from openpyxl import Workbook, load_workbook
+from lib.log import lg_info, lg_warning, lg_debug, init_log
+from lib.lib_func import wait_time
 
-
-logging.basicConfig(level=logging.DEBUG)
-
+#logging.basicConfig(level=logging.DEBUG)
+init_log()
 
 WBCLIENT = 'ssologin.js(v1.4.5)'
 user_agent = (
@@ -51,8 +52,7 @@ def wblogin(username, password):
                'su=%s&rsakt=mod&client=%s' %
                (base64.b64encode(username.encode('utf-8')), WBCLIENT)
            )
-    os.system('sleep 3')
-    print('uuuuuuuuuuuuuuuuu\n')
+    wait_time(3)
 
     pre_login_str = re.match(r'[^{]+({.+?})', resp.text).group(1)
     pre_login = json.loads(pre_login_str)

@@ -2,9 +2,10 @@
 
 import openpyxl as pxl
 import shapefile as shp
+import pymongo
+from settings.settings import MONGO_DB
 
-
-def convert():
+def xls_convert():
     sp = shp.Writer(shp.POINT)
     sp.field('content')
     sp.field('type', 'C', 40)
@@ -23,5 +24,24 @@ def convert():
         except:
             pass
     sp.save()
+
+def mongo_convert():
+    client = pymongo.MongoClient(MONGO_DB['address'], MONGO_DB['port'])
+    db = client.get_database(name=MONGO_DB['db_name'])
+    collection = db.get_collection(name=MONGO_DB['collection_name'])
+    data = collection.find({})
+    sp = shp.Writer(shp.POINT)
+    sp.field('content')
+    sp.field('type', 'C', 40)
+    for i in data:
+        try:
+            latitude = float(i['geo']['coordinates'][0])
+            longitude = float(i['geo']['coordinates'][1])
+            sp.point(longitude, latitude)
+            sp.record('xxx', 'Point')
+        except:
+            pass
+    sp.save()
+
 if __name__ == '__main__':
-    convert()
+    mongo_convert()

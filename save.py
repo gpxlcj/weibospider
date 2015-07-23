@@ -5,13 +5,13 @@ import random
 import re
 
 from official.weibo_api import short_to_long
-
+from lib.log import lg_debug, lg_info, lg_warning
 
 #excel读写操作
 from openpyxl import load_workbook
 from openpyxl.writer.excel import ExcelWriter
 
-from settings.settings import SAVE_FILE_NAME, SHEET_NAME, MONGO_CLIENT_ADDR, MONGO_CLIENT_PORT
+from settings.settings import SAVE_FILE_NAME, SHEET_NAME, MONGO_DB
 
 from pymongo import MongoClient
 
@@ -64,7 +64,8 @@ def get_location(get_text, session):
         url = location_re.search(origin_url).group()[:-2]
         url = url.replace('\\', '')
         print (url+'\n')
-        coordinate = short_to_long(url, session, random.randint(0, 5))#顺序为经度、纬度 
+        coordinate = short_to_long(url, session, random.randint(0, 5))#顺序为经度、纬度
+        lg_info(str(coordinate))
         return coordinate 
     else:
         return None
@@ -73,16 +74,24 @@ def get_location(get_text, session):
 
 #mongodb存储数据
 def save_data_by_db(get_list):
-    client = MongoClient(MONGO_CLIENT_ADDR, MONGO_CLIENT_PORT)
+    client = MongoClient(MONGO_DB['address'], MONGO_DB['port'])
     db = client.weibodata
+    db = client.get_database(name=MONGO_DB['db_name'])
     #存储根据北京地理位置获得的微博
+    collection = db.get_collection(name=MONGO_DB['collection_name'])
     collection = db.BeijingGeo
-    try:
-        for wd in get_list:
+    if get_list:
+        pass
+    else:
+        get_list = list()
+    for wd in get_list:
+        try:
             collection.insert_one(wd).inserted_id
-        return True
-    except:
-        return False
+            lg_debug(str(True)+':save success'+str(len(get_list)))
+        except Exception:
+            lg_debug(str(False)+':mongodb save fail')
+            lg_warning(Exception.message)
+    return True
 
 
 #if __name__ == '__main__':
