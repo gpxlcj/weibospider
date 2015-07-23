@@ -2,7 +2,6 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import sys
-import time
 
 #excel读写操作
 from openpyxl import Workbook
@@ -40,10 +39,3 @@ def init_xls(r_id=0):
     wb.save(SAVE_FILE_NAME)
 
 
-#转换时间
-def convert_time(year, month, day, hour=0):
-    time_str = year+'-'+month+'-'+day+' '+hour+':'+'00:00'
-    time_format = "%Y-%m-%d %H:%M:%S"
-    form_time = time.strptime(time_str, time_format)
-    time_stamp = str(time.mktime(form_time))
-    return time_stamp
