@@ -7,7 +7,7 @@ Description
 ----------
 
 A spider to catch the microblog data from [weibo][2].  
-The data can be crawled by time, keywords and so on.the data field can be customed to grab.
+The data can be crawled by time, keywords and so on.the data field can be customed to catch.
 中文详细信息 [WeiboSpider wiki][4]
 Detail info in English [WeiboSpider wiki][5]
 **The summarize of each scripts:**
