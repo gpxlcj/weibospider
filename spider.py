@@ -161,6 +161,7 @@ def fourtree(session, coordinate, starttime, geo_range, inter_lat, inter_lon):
     info_list = get_weibo_by_coordinate(session, coordinate, starttime, 0, geo_range, 0, 50, 20, 0)
     if info_list:
         print (geo_range)
+        save_data_by_db(info_list)
     else:
         print (0)
     if info_list:
@@ -211,14 +212,16 @@ def get_info_history(session):
         view_list = fourtree(session, QUERY_COORDINATE_LIST[p_id], starttime, geo_range, inter_lat, inter_lon)
         for view in view_list:
             p = 1
-            while p < 21:
+            while p < 20:
                 coordinate = view['coordinate']
                 geo_range = view['geo_range']
                 temp_time = random.randint(10, 15)
                 wait_time(temp_time)
                 info_list = get_weibo_by_coordinate(session, coordinate, starttime, endtime, geo_range, 0, page_count, p, 0)
                 if info_list:
-                    save_data_by_db(info_list)
+                    pd = save_data_by_db(info_list)
+                    if not pd:
+                        break
                     p += 1
                 else:
                     break
