@@ -20,6 +20,8 @@ def wait_time(sleep_time):
     os.system(os_sleep)
     return True
 
+
+#比较字符串大小
 def arbitrary_precision_compare(str1, str2):
     length1 = len(str1)
     length2 = len(str2)
