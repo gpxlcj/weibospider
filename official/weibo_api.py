@@ -2,10 +2,14 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import json
+import random
+import datetime
+from requests.exceptions import ConnectionError
 
 #配置文件
 from settings.settings import APP_SOURCE_LIST, APP_SOURCE
-from lib.log import lg_debug, lg_warning, lg_info, init_log
+from lib.log import lg_debug, lg_warning, lg_info, init_log, LogDate
+from lib.lib_func import wait_time
 init_log()
 
 #判断请求是否超出限制
@@ -81,12 +85,47 @@ def get_weibo_by_ids(m_ids, session):
 
 #根据地理坐标进行批量获取微博
 def get_weibo_by_coordinate(session, coordinate, starttime, endtime, range=2000, sort=0, count=20, page=1, offset=0):
-    url = "http://api.weibo.com/2/place/nearby_timeline.json?"
-    url += "source="+APP_SOURCE
-    url += "&lat="+coordinate['latitude']+"&long="+coordinate['longitude']
-    url += "&starttime="+str(starttime)+"&range="+str(range)+"&sort="+str(sort)
-    url += "&count="+str(count)+"&page="+str(page)+"&offset="+str(offset)
-    text = session.get(url)
+    if log_date.log_date.year != datetime.datetime.now():
+        log_date.change_log_date()
+        init_log()
+    num = 0
+    pd_403 = [0] * len(APP_SOURCE_LIST)
+    end_403 = [1] * len(APP_SOURCE_LIST)
+    while True:
+        try:
+            app_id = random.randint(0, len(APP_SOURCE_LIST)-1)
+            url = "http://api.weibo.com/2/place/nearby_timeline.json?"
+            url += "source="+APP_SOURCE_LIST[app_id]
+            url += "&lat="+coordinate['latitude']+"&long="+coordinate['longitude']
+            url += "&starttime="+str(starttime)+"&range="+str(range)+"&sort="+str(sort)
+            url += "&count="+str(count)+"&page="+str(page)+"&offset="+str(offset)
+            text = session.get(url)
+            if text.status_code == 403:
+                pd_403[app_id] = 1
+                if pd_403 == end_403:
+                    sleep_time = 15600
+                else:
+                    sleep_time = random.randint(12, 30)
+                wait_time(sleep_time)
+                continue
+            break
+        except ConnectionError:
+            num += 1
+            lg_warning(ConnectionError)
+            lg_debug('connect fail'+str(num))
+            sleep_time = random.randint(6, 10)
+            wait_time(str(sleep_time))
+            continue
+        except Exception:
+            num += 1
+            print('Connection reset by peer error')
+            lg_warning(Exception)
+            lg_debug('Connection reset by peer'+str(num))
+            sleep_time = random.randint(10, 20)
+            wait_time(str(sleep_time))
+            continue
+
+
     text_dict = None
     text_list_dict = None
     try:
