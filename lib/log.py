@@ -3,6 +3,19 @@ __author__ = 'gpxlcj'
 import logging as lg
 import datetime as dt
 
+log_date = dt.datetime.now()
+
+
+class LogDate:
+    log_date = dt.datetime.now()
+
+    def __init__(self):
+        self.log_date = dt.datetime.now()
+
+    def change_log_date(self):
+        self.log_date = dt.datetime.now()
+        return log_date
+
 
 #初始化日志信息
 def init_log():
