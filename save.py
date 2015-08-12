@@ -75,23 +75,25 @@ def get_location(get_text, session):
 #mongodb存储数据
 def save_data_by_db(get_list):
     client = MongoClient(MONGO_DB['address'], MONGO_DB['port'])
-    db = client.weibodata
     db = client.get_database(name=MONGO_DB['db_name'])
     #存储根据北京地理位置获得的微博
     collection = db.get_collection(name=MONGO_DB['collection_name'])
-    collection = db.BeijingGeo
     if get_list:
         pass
     else:
         get_list = list()
+
+    num = 0
+    pd = False
     for wd in get_list:
         try:
             collection.insert_one(wd).inserted_id
-            lg_debug(str(True)+':save success'+str(len(get_list)))
+            lg_debug('True:save success'+str(len(get_list)))
+            pd = True
         except Exception:
-            lg_debug(str(False)+':mongodb save fail')
-            lg_warning(Exception.message)
-    return True
+            num += 1
+    lg_debug('False:mongodb save fail. num:'+str(num))
+    return pd
 
 
 #if __name__ == '__main__':
