@@ -59,6 +59,16 @@ INTER_HOUR = 0
 QUERY_COORDINATE_LIST = [
 ]
 
+DISTANCE = 2000
+INTER_LAT = 0.05
+INTER_LON = 0.05
+BOUND_COORDINATE_POINT = {
+    'lt': {'latitude': '', 'longitude': ''},
+    'rt': {'latitude': '', 'longitude': ''},
+    'lb': {'latitude': '', 'longitude': ''},
+    'rb': {'latitude': '', 'longitude': ''},
+}
+
 '''
 数据库配置
 '''
